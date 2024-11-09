@@ -1,0 +1,26 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y curl jq gnupg git wget unzip
+
+# Install opentofu installer
+RUN wget https://github.com/opentofu/opentofu/releases/download/v1.8.4/tofu_1.8.4_linux_amd64.zip \
+    && unzip tofu_1.8.4_linux_amd64.zip \
+    && mv tofu /usr/local/bin/tofu \
+    && rm -f tofu_1.8.4_linux_amd64.zip
+
+# Generate SSH key
+# https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/#creating-a-key-pair
+RUN ssh-keygen -t rsa -b 4096 -f /root/.ssh/deployer-key
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip
+
+CMD ["/bin/bash"]
