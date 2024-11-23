@@ -17,4 +17,6 @@ docker run -dit -v "$(pwd)/../:/app" \
 
 # ------------------------------------------------------------
 
+# Add your initiating commands here
+
 echo "init.sh completed!"

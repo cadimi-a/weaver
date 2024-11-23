@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # The following line is used for GitHub Actions --------------
+
 container_name="${1:?Error: No container name provided}"
 
 echo "Initiating the container..."
@@ -10,9 +11,6 @@ docker run -dit -v "$(pwd)/../:/app" \
 
 # ------------------------------------------------------------
 
-echo "Testing..."
-docker exec ${container_name} tofu -chdir=/app init
-docker exec ${container_name} tofu -chdir=/app validate
-docker exec ${container_name} tofu -chdir=/app test -test-directory=test
+# Add your testing commands here
 
-echo "test.sh completed!"
+echo "Initiating the container..."

@@ -1,0 +1,163 @@
+name: PR Workflow for Main
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  pr-check:
+    name: PR Check
+    runs-on: ubuntu-latest
+    outputs:
+      directory: ${{ steps.check_dirs.outputs.directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get main branch SHA
+        id: get_main_sha
+        run: |
+          # Save current branch name
+          current_branch=$(git rev-parse --abbrev-ref HEAD)
+          
+          # Checkout main branch
+          git checkout main
+          
+          # Get the latest commit SHA from main
+          main_commit=$(git rev-parse HEAD)
+          
+          # Return to the original branch
+          git checkout "$current_branch"
+          
+          # Output the results
+          echo "main_commit=$main_commit" >> $GITHUB_ENV
+          echo "current_branch=$current_branch" >> $GITHUB_ENV
+
+      - name: Check for single directory change
+        id: check_dirs
+        run: |
+          # Get the list of changed directories
+          CHANGED_DIRS=$(git diff --name-only ${{ env.main_commit }} ${{ github.sha }} | awk -F/ '{print $1"/"$2}' | grep '^architectural_patterns/' | uniq)
+          echo "Changed directories: $CHANGED_DIRS"
+
+          # Get directory and count the number of unique top-level directories
+          DIR=$(echo "$CHANGED_DIRS" | grep '^architectural_patterns/' | uniq)
+          DIR_COUNT=$(echo "$DIR" | wc -l)
+          
+          # Allow at most 1 directory change under `architectural_patterns/`
+          echo "DIR_COUNT: $DIR_COUNT"
+          if [ "$DIR_COUNT" -gt 1 ]; then
+            echo "Only 1 directory change is allowed under 'architectural_patterns/'."
+            echo "validation_failed=true" >> $GITHUB_OUTPUT
+          else
+            echo "validation_failed=false" >> $GITHUB_OUTPUT
+            echo "directory=$DIR" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: false
+
+      - name: Post comment if validation fails
+        if: steps.check_dirs.outputs.validation_failed == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Only 1 directory change is allowed under `architectural_patterns/`. Please revise your PR."
+            })
+        continue-on-error: false
+
+      - name: Fail if validation fails
+        if: steps.check_dirs.outputs.validation_failed == 'true'
+        run: exit 1
+
+  init:
+    name: Init
+    needs: pr-check
+    runs-on: ubuntu-latest
+    outputs:
+      directory: ${{ needs.pr-check.outputs.directory }}
+      pattern_name: ${{ env.pattern_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run init script
+        run: |
+          dir=${{ needs.pr-check.outputs.directory }}
+          cd $dir/scripts
+          chmod +x init.sh
+          ./init.sh ${dir##*/}          
+          echo "pattern_name=${dir##*/}" >> $GITHUB_ENV
+
+      - name: Save Docker image to file
+        run: |
+          docker save ${{ env.pattern_name }}:latest -o ${{ env.pattern_name }}.tar
+
+      - name: Upload Docker image as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.pattern_name }}
+          path: ${{ env.pattern_name }}.tar
+
+  build:
+    name: Build
+    needs: init
+    runs-on: ubuntu-latest
+    outputs:
+      directory: ${{ needs.init.outputs.directory }}
+      pattern_name: ${{ env.pattern_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.init.outputs.pattern_name }}
+
+      - name: Load Docker image
+        run: |
+          docker load -i ${{ needs.init.outputs.pattern_name }}.tar
+
+      - name: Run build script
+        run: |
+          cd ${{ needs.init.outputs.directory }}/scripts
+          chmod +x build.sh
+          ./build.sh ${{ needs.init.outputs.pattern_name }}
+          echo "pattern_name=${{ needs.init.outputs.pattern_name }}" >> $GITHUB_ENV
+
+      - name: Save Docker image to file
+        run: |
+          docker save ${{ env.pattern_name }}:latest -o ${{ env.pattern_name }}.tar
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Debug directory
+        run: |
+          echo "Directory is ${{ needs.build.outputs.directory }}"
+          echo "Build Pattern name is ${{ needs.build.outputs.pattern_name }}"
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.pattern_name }}
+
+      - name: Load Docker image
+        run: |
+          docker load -i ${{ needs.build.outputs.pattern_name }}.tar
+
+      - name: Run test script
+        run: |
+          cd ${{ needs.build.outputs.directory }}/scripts
+          chmod +x test.sh
+          ./test.sh ${{ needs.build.outputs.pattern_name }}
