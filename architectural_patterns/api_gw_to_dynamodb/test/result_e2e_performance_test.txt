@@ -1,0 +1,19 @@
+E2E Performance Test Results====================================================
+Total Requests: 100
+Total Success: 100
+Overall Success Rate: 100.00%
+Total Time Taken: 6.97s
+Overall Average Response Time: 0.67s
+Batch Average Total Time: 0.70s
+
+Batch Total Times:
+Batch 1: 0.76s
+Batch 2: 0.72s
+Batch 3: 0.68s
+Batch 4: 0.66s
+Batch 5: 0.69s
+Batch 6: 0.70s
+Batch 7: 0.67s
+Batch 8: 0.69s
+Batch 9: 0.71s
+Batch 10: 0.69s
