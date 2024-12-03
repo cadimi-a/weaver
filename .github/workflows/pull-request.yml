@@ -127,7 +127,7 @@ jobs:
         run: |
           cd ${{ needs.init.outputs.directory }}/scripts
           chmod +x build.sh
-          ./build.sh ${{ needs.init.outputs.pattern_name }}
+          ./build.sh ${{ needs.init.outputs.pattern_name }} actions
           echo "pattern_name=${{ needs.init.outputs.pattern_name }}" >> $GITHUB_ENV
 
       - name: Save Docker image to file
@@ -160,4 +160,4 @@ jobs:
         run: |
           cd ${{ needs.build.outputs.directory }}/scripts
           chmod +x test.sh
-          ./test.sh ${{ needs.build.outputs.pattern_name }}
+          ./test.sh ${{ needs.build.outputs.pattern_name }} actions
