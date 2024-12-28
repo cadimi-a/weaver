@@ -28,6 +28,7 @@ In the tech industry I've experienced, many common problems have established sol
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/) for commit messages.
 - Main dependencies in the pattern should be used with specific versions. This ensures that the pattern can be run without any issues in the future.
+- Restrain from using remote iaC modules(e.g. terraform registry public module). This increases unnecessary external dependencies and may not be suitable for the goals of this project.
 
 # GitHub Actions Workflow
 ## PR to Main Branch
