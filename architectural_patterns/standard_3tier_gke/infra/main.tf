@@ -6,6 +6,13 @@ locals {
   k8s_pod_ip_cidr_range           = "10.1.0.0/16"
   k8s_svc_ip_cidr_range           = "10.2.0.0/20"
   k8s_control_plane_ip_cidr_range = "172.16.0.0/28"
+
+  gke_node_roles = [
+    "roles/container.nodeServiceAccount",
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+    "roles/monitoring.viewer",
+  ]
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -177,27 +184,11 @@ resource "google_service_account" "gke_node_pool_sa" {
   display_name = "${var.infra_name_tag}-gke-node-pool-service-account"
 }
 
-resource "google_project_iam_member" "gke_node_binding_nsa" {
-  project = var.project_id
-  role    = "roles/container.nodeServiceAccount"
-  member = "serviceAccount:${google_service_account.gke_node_pool_sa.email}"
-}
-resource "google_project_iam_member" "gke_node_binding_log_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.gke_node_pool_sa.email}"
-}
-
-resource "google_project_iam_member" "gke_node_binding_metric_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.gke_node_pool_sa.email}"
-}
-
-resource "google_project_iam_member" "gke_node_binding_monitor_viewer" {
-  project = var.project_id
-  role    = "roles/monitoring.viewer"
-  member  = "serviceAccount:${google_service_account.gke_node_pool_sa.email}"
+resource "google_project_iam_member" "gke_node_bindings" {
+  for_each = toset(local.gke_node_roles)
+  project  = var.project_id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.gke_node_pool_sa.email}"
 }
 
 resource "google_container_node_pool" "primary_node_pool" {
