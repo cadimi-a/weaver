@@ -1,0 +1,42 @@
+FROM ubuntu:24.04
+
+# The following line is used for GitHub Actions --------------
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /app
+
+# -------------------------------------------------------------
+
+# Install system dependencies and Python3
+RUN apt-get -y update && apt-get install -y \
+    gcc \
+    curl \
+    wget \
+    bash \
+    jq \
+    libffi-dev \
+    libssl-dev \
+    software-properties-common \
+    python3 \
+    pip \
+    gnupg \
+    unzip \
+    vim \
+    apt-transport-https \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Gcloud
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && apt-get install google-cloud-cli -y
+
+# Install Terraform
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
+    && apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+    && apt-get update && apt-get install -y terraform=1.10.3-*
+
+# Install kubectl
+Run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+CMD ["/bin/bash"]
