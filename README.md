@@ -1,5 +1,5 @@
 # Overview
-**Weaver** is an open-source project designed to provide a comprehensive collection of Infrastructure as Code (IaC) configurations for quickly and efficiently creating various cloud-based architectures. Inspired by the intricate nests constructed by weaver birds, this project aims to interlace proven patterns and best practices to help developers and DevOps engineers deploy complex environments with ease.
+**Weaver** is a project designed to provide a comprehensive collection of Infrastructure as Code (IaC) configurations for quickly and efficiently creating various cloud-based architectures. Inspired by the intricate nests constructed by weaver birds, this project aims to interlace proven patterns and best practices to help developers and engineers deploy complex environments with ease.
 
 # Motivation
 In the tech industry I've experienced, many common problems have established solutions that follow well-known patterns. However, these patterns are often described in materials without accompanying IaC code, making it challenging for professionals to implement and test them promptly. This gap hinders the ability to visualize and understand the trade-offs between different architectural choices.
@@ -18,17 +18,17 @@ In the tech industry I've experienced, many common problems have established sol
 - Restrain from mixing multiple architectures in a single directory. Every pattern is isolated in its own directory.
 - Copy pattern_template folder to architectural_patterns and rename it to the pattern name when you start to create a new pattern. It contains necessary components for a pattern. It might occur errors in Actions flow if you remove any of them. There are some explanations about the components below.
 
-| File/directory | Comments                                                                                                                        |
-|----------------|---------------------------------------------------------------------------------------------------------------------------------|
-| README.md      | It should be included in the pattern directory.                                                                                 |
-| doc            | Drawio file is required. It would be helpful to maintain after it's merged                                                      |
-| scripts        | It has at least 5 shell scripts. init.sh, build.sh, test.sh, deploy.sh, clean.sh                                                |
-| dockerfile     | Establish the environment to build, deploy, test the pattern                                                                    |
-| test           | At least 1 test logic should be included e.g. communication test in rest api architecture, calculating data processing time etc |
+| File/directory | Comments                                                                                                                                          |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| README.md      | It should be included in the pattern directory. and you can edit its content as needed.                                                           |
+| doc            | Drawio file is required. It would be helpful to maintain after it's merged                                                                        |
+| scripts        | It has at least 5 shell scripts. init.sh, build.sh, test.sh, deploy.sh, clean.sh                                                                  |
+| dockerfile     | Establish the environment to build, deploy, test the pattern                                                                                      |
+| test           | It is recommended to include at least one test logic, such as a communication test in REST API architecture or calculating data processing time.  |
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/) for commit messages.
 - Main dependencies in the pattern should be used with specific versions. This ensures that the pattern can be run without any issues in the future.
-- Refrain from using remote modules. The fundamental goal of this project is to enhance understanding of the architecture, so I aim to minimize black-box components as much as possible. If module development is necessary, please implement it under the appropriate path within the `modules` directory.
+- Refrain from using remote modules. The fundamental goal of this project is to enhance understanding of the architecture, so I aim to minimize black-box components and unnecessary external dependencies as much as possible. If module development is necessary, please implement it under the appropriate path within the `modules` directory.
 
 # GitHub Actions Workflow
 ## PR to Main Branch

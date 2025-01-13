@@ -1,6 +1,7 @@
 
 # Diagram
-![diagram.jpg](doc%2Fdiagram.jpg)
+![diagram.jpg](doc/diagram.jpg)
+
 # Main Services in Use
 Example:
 
@@ -21,11 +22,11 @@ Example:
 | 1    | `cd scripts`                            | Navigate to the scripts folder          |
 | 2    | `./init.sh`                             | Initiate the Docker container           |
 | 3    | `./test.sh`                             | Test the Python codes (Unit Test)       |
-| 4    | `./deploy.sh`                           | Deploys the Jenkins environment         |
+| 4    | `./deploy.sh`                           | Deploys the environment                 |
 | -    | `python ./test/e2e_performance_test.py` | Test e2e data ingestion after deploy.sh |
 | -    | `./clean.sh`                            | Remove the environment                  |
 
-# Purpose of this Architecture
+# Implementation Objective
 Implement the architecture described in the link below and verify its performance:
 - https://aws.amazon.com/ko/blogs/compute/using-amazon-api-gateway-as-a-proxy-for-dynamodb/
 

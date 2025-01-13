@@ -13,8 +13,6 @@ Example:
 
 # Getting Started
 
-# Purpose of this Architecture
-
 # Best-Suited Scenarios for This Architecture
 
 # Potential Alternatives for This Architecture
